@@ -19,39 +19,19 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.username = sessionStorage.getItem('name')
-
-    this.GetUserList(this.RefreshCallbackFunction());
+    this.username = sessionStorage.getItem('name');
+      this._AuthService.getUserList().subscribe(data=>{
+        this.StudnetList = data;
+      });        
   }
 
-  RefreshCallbackFunction= async()=> { 
-    console.log("This is a callback function.") ;
-    await this._AuthService.GenrateNewToken();
-}
-GetUserList=(Refresh)=> { 
-    console.log( "Running function first with message: "); 
-    this._AuthService.getUserList().subscribe(data=>{
-      console.log(data)
-      this.StudnetList = data;
-    },error => {
-      if(error.status == 401)
-      {
-        console.log(' Token Expired or Missing 401');
-      }
-    });
 
-    if (typeof Refresh == "function") 
-    {
-      Refresh(); 
-    }
-        
-} 
+
 
 
 
   logout= ()=>{
-    this.AuthService.logout()
-    this._Router.navigateByUrl('auth')
+    this.AuthService.logout();
   }
 
 
@@ -73,7 +53,7 @@ GetUserList=(Refresh)=> {
           {
             Swal.fire('Deleted!','Your Record has been deleted.','success')
             this._Router.navigateByUrl('/RefreshComponent', { skipLocationChange: true }).then(() => {
-              this._Router.navigate([DashboardComponent]);
+              this._Router.navigateByUrl('Dashboard/Home');
           });
           }
           

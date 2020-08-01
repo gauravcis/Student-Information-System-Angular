@@ -28,6 +28,7 @@ export class LoginComponent implements OnInit {
   onSubmit(){
     this.spinner.show();
     this._AuthService.DoLogin(this.mainLoginForm.value).subscribe(data => {
+      console.log(data);
       this.apiResult = data;
       if(this.apiResult.status == 200)
       {

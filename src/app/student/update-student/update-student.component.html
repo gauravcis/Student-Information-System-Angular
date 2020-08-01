@@ -55,7 +55,8 @@
             <!-- End of Topbar -->
 
             <!-- Begin Page Content -->
-            <div class="container-fluid">
+          
+            <div *ngIf="currentStd != null" class="container-fluid">
 
                 <!-- Page Heading -->
                 <h1 class="h3 mb-4 text-gray-800">Edit student</h1>
@@ -70,7 +71,7 @@
                     </div>
                     <div class="form-group">
                         <label >Date of Birth</label>
-                        <input formControlName="DOB" type="date" class="form-control" [ngModel]="currentStd.dob">
+                        <input formControlName="DOB" type="date" class="form-control" [ngModel]="dateConverted">
                       </div>
                       <div class="form-group">
                         <label >Contact</label>
@@ -91,6 +92,7 @@
                 <!-- /.container-fluid -->
 
             </div>
+          
             <!-- End of Main Content -->
 
             <!-- Footer -->

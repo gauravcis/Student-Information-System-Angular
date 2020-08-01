@@ -13,6 +13,7 @@ export class RegisterStudentComponent implements OnInit {
 
   mainLoginForm : FormGroup;
   apiResult;
+  res;
   constructor(public _FormBuilder:FormBuilder,public AuthService:AuthService,private Router:Router) { }
 
   ngOnInit(): void {
@@ -33,7 +34,21 @@ export class RegisterStudentComponent implements OnInit {
     }
     else
     {
-      this.AuthService.registerStudent(this.mainLoginForm.value).subscribe(res => {
+      this.AuthService.registerStudent(this.mainLoginForm.value).subscribe(res => 
+        {
+          this.res = res
+        if(this.res.status === 200)
+        {
+          Swal.fire(this.res.message);
+          this.Router.navigateByUrl('Dashboard');
+        }
+        else
+        {
+          Swal.fire(this.res.message);
+          this.Router.navigateByUrl('Dashboard');
+        }
+        
+      },error =>{
         Swal.fire('Student Registered');
         this.Router.navigateByUrl('Dashboard');
       })

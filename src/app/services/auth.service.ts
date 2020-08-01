@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import * as jwt_decode from 'jwt-decode';
 import { async } from 'rxjs/internal/scheduler/async';
+import { catchError, tap, switchMap } from 'rxjs/operators';
+import {Router} from '@angular/router'
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   data;
   baseURl = "https://localhost:44388/api/";
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient,private Router:Router) { }
 
  
   DoLogin=(formData)=>{
@@ -19,7 +21,10 @@ export class AuthService {
     return this.http.post(this.baseURl + "Auth/login",DataObj)
   }
 
+ 
   SaveLogin=(data)=>{
+    sessionStorage.setItem('JwtTokenExpirey',data.jwtTokenExpirey)
+    sessionStorage.setItem('RefreshTokenExpire',data.refreshTokenExpire)
     sessionStorage.setItem('auth',data.auth)
     sessionStorage.setItem('email',data.email)
     sessionStorage.setItem('jwtToken',data.jwtToken)
@@ -36,24 +41,6 @@ export class AuthService {
     const date = new Date(0); 
     date.setUTCSeconds(decoded.exp);
     return date;
-  }
-
-
-  IsUserStillLoggedin= async()=>{
-    
-    const isTokenExpired  = this.isTokenExpired();
-
-    console.log("isTokenExpired",isTokenExpired)
-    if(isTokenExpired)
-    {
-       this.GenrateNewToken();
-      
-    }
-    else
-    {
-      //can access
-      return true
-    }
   }
 
   GenrateNewToken = () => {
@@ -74,10 +61,21 @@ export class AuthService {
     if(date === undefined) return false;
     var temp = !(date.valueOf() > new Date().valueOf());
     
-    return temp;
-
-    
+    return temp;    
   }
+
+  isTokenAvaiable =()=>{
+    var token = sessionStorage.getItem('jwtToken');
+    if(token === null)
+    {
+      return false
+    }
+    else
+    {
+      return true
+    }
+  }
+
 
   logout = () =>{
     sessionStorage.removeItem('auth')
@@ -85,6 +83,10 @@ export class AuthService {
     sessionStorage.removeItem('jwtToken')
     sessionStorage.removeItem('message')
     sessionStorage.removeItem('name')
+    sessionStorage.removeItem('JwtTokenExpirey')
+    sessionStorage.removeItem('RefreshToken')
+    sessionStorage.removeItem('RefreshTokenExpire')
+    this.Router.navigateByUrl('auth')
   }
 
 
@@ -98,8 +100,8 @@ export class AuthService {
   }
 
   getUserList = () => {
-   var headers = this.getToken();
-    return this.http.get(this.baseURl + "Student/GetStudentList",{headers})
+  //  var headers = this.getToken();
+    return this.http.get(this.baseURl + "Student/GetStudentList")
   }
 
   deleteStudent = (id) =>{
@@ -131,5 +133,23 @@ export class AuthService {
         'Authorization':`Bearer ${jwtToken}`
       });
     return this.http.put(this.baseURl + `Student/UpdateStudent?StudentId=${id}`,data,{headers})
+  }
+
+  getNewAccessToken() {
+    var obj = {AccessToken:'',RefreshToken:''};
+    obj.AccessToken =  sessionStorage.getItem('jwtToken');
+    obj.RefreshToken = sessionStorage.getItem('RefreshToken');
+
+    return this.http.post(this.baseURl + "Auth/RefreshToken",obj, {
+      observe: 'response'
+    }).pipe(
+      tap((res: HttpResponse<any>) => {
+        this.setAccessToken(res.body.newjwtToken);
+      })
+    )
+  }
+
+  setAccessToken(accessToken: string) {
+    sessionStorage.setItem('jwtToken', accessToken)
   }
 }

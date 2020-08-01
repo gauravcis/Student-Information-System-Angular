@@ -15,7 +15,7 @@ const routes: Routes = [
   {
     path:'Home',
     component:DashboardComponent,
-    //canActivate: [AuthGuardService]
+    canActivate: [AuthGuardService]
   },
   {
     path:'RegisterStudent',

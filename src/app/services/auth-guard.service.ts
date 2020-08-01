@@ -11,26 +11,18 @@ export class AuthGuardService implements CanActivate {
   constructor(private AuthService:AuthService,private Router:Router) { }
 
   canActivate(): boolean {
-    const IsUserStillLoggedin = this.AuthService.IsUserStillLoggedin();
-    if (IsUserStillLoggedin) 
+    const isTokenAvaiable = this.AuthService.isTokenAvaiable();
+
+    //console.log("isTokenAvaiable",isTokenAvaiable)
+    if (isTokenAvaiable) 
     {
       return true;
     }
     else
     {
-      const IsUserStillLoggedin = this.AuthService.IsUserStillLoggedin();
-      if (IsUserStillLoggedin) 
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    // Swal.fire('Wait',`Please Login to Access ......`,'warning')
-    // this.Router.navigate(['auth']);
-    //   return false;
-    
+       Swal.fire(`Please Login`,'You are not allowed to access','error');
+       this.AuthService.logout();
+      return false;
+    }    
   }
 }
